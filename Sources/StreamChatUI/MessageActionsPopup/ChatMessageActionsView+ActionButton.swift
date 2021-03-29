@@ -5,12 +5,12 @@
 import UIKit
 
 extension _ChatMessageActionsView {
+    /// Button for action displayed in `_ChatMessageActionsView`
     open class ActionButton: _Button, UIConfigProvider {
-        public var actionItem: ChatMessageActionItem<ExtraData>? {
+        /// The data this view component shows.
+        public var content: ChatMessageActionItem<ExtraData>? {
             didSet { updateContentIfNeeded() }
         }
-
-        // MARK: Overrides
 
         override public func defaultAppearance() {
             backgroundColor = uiConfig.colorPalette.background
@@ -36,23 +36,22 @@ extension _ChatMessageActionsView {
             let imageTintСolor: UIColor
             let titleTextColor: UIColor
 
-            if actionItem?.isDestructive == true {
+            if content?.isDestructive == true {
                 imageTintСolor = uiConfig.colorPalette.alert
                 titleTextColor = imageTintСolor
             } else {
-                imageTintСolor = actionItem?.isPrimary == true ? tintColor : uiConfig.colorPalette.inactiveTint
+                imageTintСolor = content?.isPrimary == true ? tintColor : uiConfig.colorPalette.inactiveTint
                 titleTextColor = uiConfig.colorPalette.text
             }
 
-            setImage(actionItem?.icon.tinted(with: imageTintСolor), for: .normal)
-            setTitle(actionItem?.title, for: .normal)
+            setImage(content?.icon.tinted(with: imageTintСolor), for: .normal)
+            setTitle(content?.title, for: .normal)
             setTitleColor(titleTextColor, for: .normal)
         }
-
-        // MARK: Actions
         
+        /// Triggered when `ActionButton` is tapped
         @objc open func touchUpInsideHandler(_ sender: Any) {
-            actionItem?.action()
+            content?.action()
         }
     }
 }

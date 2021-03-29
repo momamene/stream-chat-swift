@@ -5,6 +5,8 @@
 import StreamChat
 import UIKit
 
+/// Instance of one action item
+/// Action items are then showed in `_ChatMessageActionsView`
 public struct ChatMessageActionItem<ExtraData: ExtraDataTypes> {
     public let title: String
     public let icon: UIImage

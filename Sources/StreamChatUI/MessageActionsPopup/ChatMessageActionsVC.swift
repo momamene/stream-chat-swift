@@ -44,7 +44,7 @@ open class _ChatMessageActionsVC<ExtraData: ExtraDataTypes>: _ViewController, UI
     }
 
     override open func updateContent() {
-        messageActionView.actionItems = messageActions
+        messageActionView.content = messageActions
     }
 
     open var messageActions: [ChatMessageActionItem<ExtraData>] {

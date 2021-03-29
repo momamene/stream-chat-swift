@@ -7,25 +7,24 @@ import UIKit
 
 public typealias ChatMessageActionsView = _ChatMessageActionsView<NoExtraData>
 
+/// View that contains `_ChatMessageActionItem`s
+/// It is shown in `_ChatMessagePopupVC` to show the defined action items
 open class _ChatMessageActionsView<ExtraData: ExtraDataTypes>: _View, UIConfigProvider {
-    public var actionItems: [ChatMessageActionItem<ExtraData>] = [] {
+    /// The data this view component shows.
+    public var content: [ChatMessageActionItem<ExtraData>] = [] {
         didSet { updateContentIfNeeded() }
     }
 
-    // MARK: Subviews
+    /// Stack view with action items
+    public private(set) lazy var stackView: UIStackView = UIStackView()
+        .withoutAutoresizingMaskConstraints
 
-    public private(set) lazy var stackView: UIStackView = {
-        let stackView = UIStackView()
+    override public func defaultAppearance() {
         stackView.axis = .vertical
         stackView.alignment = .fill
         stackView.distribution = .fill
         stackView.spacing = 1
-        return stackView.withoutAutoresizingMaskConstraints
-    }()
-
-    // MARK: Overrides
-
-    override public func defaultAppearance() {
+        
         layer.cornerRadius = 16
         layer.masksToBounds = true
         backgroundColor = uiConfig.colorPalette.border
@@ -41,9 +40,9 @@ open class _ChatMessageActionsView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
             stackView.removeArrangedSubview($0)
         }
 
-        actionItems.forEach {
+        content.forEach {
             let actionView = uiConfig.messageList.messageActionsSubviews.actionButton.init()
-            actionView.actionItem = $0
+            actionView.content = $0
             stackView.addArrangedSubview(actionView)
         }
     }

@@ -24,6 +24,12 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
         return UIVisualEffectView(effect: blur)
             .withoutAutoresizingMaskConstraints
     }()
+    
+    /// Properties tied to `_ChatMessagePopupVC` layout
+    public struct Layout {
+        /// Constraints of `timestampLabel`
+        public private(set) var timestampLabelConstraints: [NSLayoutConstraint] = []
+    }
 
     public private(set) lazy var messageContentView = messageContentViewClass.init()
         .withoutAutoresizingMaskConstraints
@@ -33,9 +39,8 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
     public var messageViewFrame: CGRect!
     public var originalMessageView: UIView!
     public var actionsController: _ChatMessageActionsVC<ExtraData>!
+    /// `_ChatMessageReactionsVC` instance for showing reactions.
     public var reactionsController: _ChatMessageReactionsVC<ExtraData>?
-
-    // MARK: - Private
 
     private var actionsView: UIView { actionsController.view }
     private var actionsViewHeight: CGFloat { CGFloat(actionsController.messageActions.count) * 40 }
@@ -102,7 +107,7 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
         ]
 
         if message.isSentByCurrentUser {
-            constraints.append(contentsOf: [
+            constraints += [
                 messageContentView.trailingAnchor.pin(
                     equalTo: contentView.leadingAnchor,
                     constant: messageViewFrame.maxX
@@ -111,9 +116,9 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
                 reactionsView?.centerXAnchor.pin(equalTo: messageContentView.leadingAnchor)
                     .with(priority: .defaultHigh),
                 reactionsController?.reactionsBubble.tailTrailingAnchor.pin(equalTo: messageContentView.leadingAnchor)
-            ])
+            ]
         } else {
-            constraints.append(contentsOf: [
+            constraints += [
                 messageContentView.leadingAnchor.pin(
                     equalTo: contentView.leadingAnchor,
                     constant: messageViewFrame.minX
@@ -122,25 +127,25 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
                 reactionsView?.centerXAnchor.pin(equalTo: messageContentView.trailingAnchor)
                     .with(priority: .defaultHigh),
                 reactionsController?.reactionsBubble.tailLeadingAnchor.pin(equalTo: messageContentView.trailingAnchor)
-            ])
+            ]
         }
 
         if messageViewFrame.minY <= 0 {
-            constraints.append(contentsOf: [
+            constraints += [
                 contentView.topAnchor.pin(equalTo: scrollContentView.topAnchor),
                 contentView.bottomAnchor.pin(
                     equalTo: scrollContentView.bottomAnchor,
                     constant: -(view.bounds.height - messageViewFrame.maxY - actionsViewHeight - spacing)
                 )
-            ])
+            ]
         } else {
-            constraints.append(contentsOf: [
+            constraints += [
                 contentView.topAnchor.pin(
                     equalTo: scrollContentView.topAnchor,
                     constant: messageViewFrame.minY - reactionsViewHeight - spacing
                 ),
                 contentView.bottomAnchor.pin(equalTo: scrollContentView.bottomAnchor)
-            ])
+            ]
         }
 
         NSLayoutConstraint.activate(constraints.compactMap { $0 })
@@ -148,7 +153,7 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
 
     override open func updateContent() {
         messageContentView.message = message
-        messageContentView.reactionsBubble!.isHidden = true
+        messageContentView.reactionsBubble?.isHidden = true
     }
 
     override open func viewWillAppear(_ animated: Bool) {
