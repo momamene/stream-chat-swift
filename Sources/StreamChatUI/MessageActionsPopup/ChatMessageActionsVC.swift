@@ -19,32 +19,33 @@ public typealias ChatMessageActionsVC = _ChatMessageActionsVC<NoExtraData>
 open class _ChatMessageActionsVC<ExtraData: ExtraDataTypes>: _ViewController, UIConfigProvider {
     public var messageController: _ChatMessageController<ExtraData>!
     public var delegate: Delegate?
-    public lazy var router = uiConfig.navigation.messageActionsRouter.init(rootViewController: self)
 
-    private var message: _ChatMessage<ExtraData>? {
+    /// The `_ChatMessageActionsRouter` instance responsible for navigation.
+    open private(set) lazy var router = uiConfig
+        .navigation
+        .messageActionsRouter
+        .init(rootViewController: self)
+
+    open var message: _ChatMessage<ExtraData>? {
         messageController.message
     }
 
-    // MARK: - Subviews
-
-    private lazy var messageActionView = uiConfig
+    /// The `_ChatMessageActionsView` instance for showing message's actions
+    open private(set) lazy var messageActionView = uiConfig
         .messageList
         .messageActionsSubviews
         .actionsView
         .init()
         .withoutAutoresizingMaskConstraints
 
-    // MARK: - Life Cycle
-
     override open func setUpLayout() {
+        super.setUpLayout()
         view.embed(messageActionView)
     }
 
     override open func updateContent() {
         messageActionView.actionItems = messageActions
     }
-
-    // MARK: - Actions
 
     open var messageActions: [ChatMessageActionItem<ExtraData>] {
         guard
@@ -81,7 +82,8 @@ open class _ChatMessageActionsVC<ExtraData: ExtraDataTypes>: _ViewController, UI
                 message.localState == .sendingFailed ? .resend { [weak self] in self?.handleResendAction() } : nil,
                 editAction,
                 deleteAction
-            ].compactMap { $0 }
+            ]
+            .compactMap { $0 }
         case .sending, .syncing, .deleting:
             return []
         }

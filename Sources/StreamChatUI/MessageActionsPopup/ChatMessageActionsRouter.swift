@@ -15,16 +15,20 @@ open class _ChatMessageActionsRouter<ExtraData: ExtraDataTypes>: ChatRouter<_Cha
             preferredStyle: .alert
         )
 
-        alert.addAction(UIAlertAction(
-            title: L10n.Alert.Actions.cancel,
-            style: .cancel,
-            handler: { _ in confirmed(false) }
-        ))
-        alert.addAction(UIAlertAction(
-            title: L10n.Alert.Actions.delete,
-            style: .destructive,
-            handler: { _ in confirmed(true) }
-        ))
+        alert.addAction(
+            UIAlertAction(
+                title: L10n.Alert.Actions.cancel,
+                style: .cancel,
+                handler: { _ in confirmed(false) }
+            )
+        )
+        alert.addAction(
+            UIAlertAction(
+                title: L10n.Alert.Actions.delete,
+                style: .destructive,
+                handler: { _ in confirmed(true) }
+            )
+        )
 
         rootViewController.present(alert, animated: true)
     }
