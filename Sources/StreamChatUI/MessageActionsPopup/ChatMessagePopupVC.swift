@@ -25,9 +25,10 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
             .withoutAutoresizingMaskConstraints
     }()
 
-    public private(set) lazy var messageContentView = uiConfig.messageList.messageContentView.init()
+    public private(set) lazy var messageContentView = messageContentViewClass.init()
         .withoutAutoresizingMaskConstraints
 
+    public var messageContentViewClass: _ChatMessageContentView<ExtraData>.Type!
     public var message: _ChatMessageGroupPart<ExtraData>!
     public var messageViewFrame: CGRect!
     public var originalMessageView: UIView!
