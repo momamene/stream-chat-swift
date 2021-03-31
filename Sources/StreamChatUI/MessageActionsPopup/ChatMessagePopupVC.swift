@@ -27,8 +27,7 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
     
     /// Properties tied to `_ChatMessagePopupVC` layout
     public struct Layout {
-        /// Constraints of `timestampLabel`
-        public private(set) var timestampLabelConstraints: [NSLayoutConstraint] = []
+        public private(set) var reactionsViewConstraints: [NSLayoutConstraint] = []
     }
 
     public private(set) lazy var messageContentView = messageContentViewClass.init()

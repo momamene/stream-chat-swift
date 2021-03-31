@@ -16,8 +16,11 @@ public protocol _ChatMessageActionsVCDelegate: AnyObject {
 
 public typealias ChatMessageActionsVC = _ChatMessageActionsVC<NoExtraData>
 
+/// View controller to show message actions
 open class _ChatMessageActionsVC<ExtraData: ExtraDataTypes>: _ViewController, UIConfigProvider {
+    /// `_ChatMessageController` instance used to obtain current data
     public var messageController: _ChatMessageController<ExtraData>!
+    /// `_ChatMessageActionsVC.Delegate` instance
     public var delegate: Delegate?
 
     /// The `_ChatMessageActionsRouter` instance responsible for navigation.
@@ -47,6 +50,7 @@ open class _ChatMessageActionsVC<ExtraData: ExtraDataTypes>: _ViewController, UI
         messageActionView.content = messageActions
     }
 
+    /// Array of `ChatMessageActionItem`s - override this to setup your own custom actions
     open var messageActions: [ChatMessageActionItem<ExtraData>] {
         guard
             let currentUser = messageController.client.currentUserController().currentUser,
