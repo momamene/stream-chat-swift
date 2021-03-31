@@ -36,6 +36,6 @@ open class _ChatOnlineIndicatorView<ExtraData: ExtraDataTypes>: _View, UIConfigP
     }
     
     open var maskingPath: CGPath? {
-        UIBezierPath(ovalIn: frame.insetBy(dx: -frame.width/4, dy: -frame.height/4)).cgPath
+        UIBezierPath(ovalIn: frame.insetBy(dx: -frame.width / 4, dy: -frame.height / 4)).cgPath
     }
 }

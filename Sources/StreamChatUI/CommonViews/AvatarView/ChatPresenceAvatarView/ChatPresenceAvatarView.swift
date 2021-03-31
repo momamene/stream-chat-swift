@@ -42,7 +42,6 @@ open class _ChatPresenceAvatarView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
         // Add online indicator view
         addSubview(onlineIndicatorView)
         
-        
         onlineIndicatorView.topAnchor
             .constraint(equalTo: topAnchor, constant: 1)
             .isActive = true
