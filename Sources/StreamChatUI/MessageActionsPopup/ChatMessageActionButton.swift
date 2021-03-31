@@ -10,7 +10,7 @@ public typealias ChatMessageActionButton = _ChatMessageActionButton<NoExtraData>
 /// Button for action displayed in `_ChatMessageActionsView`
 open class _ChatMessageActionButton<ExtraData: ExtraDataTypes>: _Button, UIConfigProvider {
     /// The data this view component shows.
-    public var content: ChatMessageActionItem<ExtraData>? {
+    public var content: ChatMessageActionItem? {
         didSet { updateContentIfNeeded() }
     }
 
@@ -53,6 +53,7 @@ open class _ChatMessageActionButton<ExtraData: ExtraDataTypes>: _Button, UIConfi
     
     /// Triggered when `ActionButton` is tapped
     @objc open func touchUpInsideHandler(_ sender: Any) {
-        content?.action()
+        guard let content = content else { return }
+        content.action(content)
     }
 }

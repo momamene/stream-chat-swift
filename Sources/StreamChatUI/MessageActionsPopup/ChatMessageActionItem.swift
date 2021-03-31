@@ -5,110 +5,160 @@
 import StreamChat
 import UIKit
 
-/// Instance of one action item
+/// Protocol for action item
 /// Action items are then showed in `_ChatMessageActionsView`
-public struct ChatMessageActionItem<ExtraData: ExtraDataTypes> {
-    public let title: String
-    public let icon: UIImage
-    public let isPrimary: Bool
-    public let isDestructive: Bool
-    public let action: () -> Void
+/// Setup individual item by creating new instance that conforms to this protocol
+public protocol ChatMessageActionItem {
+    var title: String { get }
+    var icon: UIImage { get }
+    var isPrimary: Bool { get }
+    var isDestructive: Bool { get }
+    var action: (ChatMessageActionItem) -> Void { get }
+}
 
-    public init(
-        title: String,
-        icon: UIImage,
-        isPrimary: Bool = false,
-        isDestructive: Bool = false,
-        action: @escaping () -> Void
+extension ChatMessageActionItem {
+    public var isPrimary: Bool { false }
+    public var isDestructive: Bool { false }
+}
+
+public struct InlineReplyActionItem: ChatMessageActionItem {
+    public var title: String { L10n.Message.Actions.inlineReply }
+    public let icon: UIImage
+    public let action: (ChatMessageActionItem) -> Void
+    
+    public init<ExtraData: ExtraDataTypes>(
+        action: @escaping (ChatMessageActionItem) -> Void,
+        uiConfig: _UIConfig<ExtraData> = .default
     ) {
-        self.title = title
-        self.icon = icon
-        self.isPrimary = isPrimary
-        self.isDestructive = isDestructive
         self.action = action
+        icon = uiConfig.images.messageActionInlineReply
     }
 }
 
-public extension ChatMessageActionItem {
-    static func inlineReply(action: @escaping () -> Void, uiConfig: _UIConfig<ExtraData> = .default) -> Self {
-        .init(
-            title: L10n.Message.Actions.inlineReply,
-            icon: uiConfig.images.messageActionInlineReply,
-            action: action
-        )
+public struct ThreadReplyActionItem: ChatMessageActionItem {
+    public var title: String { L10n.Message.Actions.threadReply }
+    public let icon: UIImage
+    public let action: (ChatMessageActionItem) -> Void
+    
+    public init<ExtraData: ExtraDataTypes>(
+        action: @escaping (ChatMessageActionItem) -> Void,
+        uiConfig: _UIConfig<ExtraData> = .default
+    ) {
+        self.action = action
+        icon = uiConfig.images.messageActionThreadReply
     }
+}
 
-    static func threadReply(action: @escaping () -> Void, uiConfig: _UIConfig<ExtraData> = .default) -> Self {
-        .init(
-            title: L10n.Message.Actions.threadReply,
-            icon: uiConfig.images.messageActionThreadReply,
-            action: action
-        )
+public struct EditActionItem: ChatMessageActionItem {
+    public var title: String { L10n.Message.Actions.edit }
+    public let icon: UIImage
+    public let action: (ChatMessageActionItem) -> Void
+    
+    public init<ExtraData: ExtraDataTypes>(
+        action: @escaping (ChatMessageActionItem) -> Void,
+        uiConfig: _UIConfig<ExtraData> = .default
+    ) {
+        self.action = action
+        icon = uiConfig.images.messageActionEdit
     }
+}
 
-    static func edit(action: @escaping () -> Void, uiConfig: _UIConfig<ExtraData> = .default) -> Self {
-        .init(
-            title: L10n.Message.Actions.edit,
-            icon: uiConfig.images.messageActionEdit,
-            action: action
-        )
+public struct CopyActionItem: ChatMessageActionItem {
+    public var title: String { L10n.Message.Actions.copy }
+    public let icon: UIImage
+    public let action: (ChatMessageActionItem) -> Void
+    
+    public init<ExtraData: ExtraDataTypes>(
+        action: @escaping (ChatMessageActionItem) -> Void,
+        uiConfig: _UIConfig<ExtraData> = .default
+    ) {
+        self.action = action
+        icon = uiConfig.images.messageActionCopy
     }
+}
 
-    static func copy(action: @escaping () -> Void, uiConfig: _UIConfig<ExtraData>) -> Self {
-        .init(
-            title: L10n.Message.Actions.copy,
-            icon: uiConfig.images.messageActionCopy,
-            action: action
-        )
+public struct UnblockUserActionItem: ChatMessageActionItem {
+    public var title: String { L10n.Message.Actions.userUnblock }
+    public let icon: UIImage
+    public let action: (ChatMessageActionItem) -> Void
+    
+    public init<ExtraData: ExtraDataTypes>(
+        action: @escaping (ChatMessageActionItem) -> Void,
+        uiConfig: _UIConfig<ExtraData> = .default
+    ) {
+        self.action = action
+        icon = uiConfig.images.messageActionBlockUser
     }
+}
 
-    static func unblockUser(action: @escaping () -> Void, uiConfig: _UIConfig<ExtraData> = .default) -> Self {
-        .init(
-            title: L10n.Message.Actions.userUnblock,
-            icon: uiConfig.images.messageActionBlockUser,
-            action: action
-        )
+public struct BlockUserActionItem: ChatMessageActionItem {
+    public var title: String { L10n.Message.Actions.userBlock }
+    public let icon: UIImage
+    public let action: (ChatMessageActionItem) -> Void
+    
+    public init<ExtraData: ExtraDataTypes>(
+        action: @escaping (ChatMessageActionItem) -> Void,
+        uiConfig: _UIConfig<ExtraData> = .default
+    ) {
+        self.action = action
+        icon = uiConfig.images.messageActionBlockUser
     }
+}
 
-    static func blockUser(action: @escaping () -> Void, uiConfig: _UIConfig<ExtraData> = .default) -> Self {
-        .init(
-            title: L10n.Message.Actions.userBlock,
-            icon: uiConfig.images.messageActionBlockUser,
-            action: action
-        )
+public struct MuteUserActionItem: ChatMessageActionItem {
+    public var title: String { L10n.Message.Actions.userMute }
+    public let icon: UIImage
+    public let action: (ChatMessageActionItem) -> Void
+    
+    public init<ExtraData: ExtraDataTypes>(
+        action: @escaping (ChatMessageActionItem) -> Void,
+        uiConfig: _UIConfig<ExtraData> = .default
+    ) {
+        self.action = action
+        icon = uiConfig.images.messageActionMuteUser
     }
+}
 
-    static func muteUser(action: @escaping () -> Void, uiConfig: _UIConfig<ExtraData> = .default) -> Self {
-        .init(
-            title: L10n.Message.Actions.userMute,
-            icon: uiConfig.images.messageActionMuteUser,
-            action: action
-        )
+public struct UnmuteUserActionItem: ChatMessageActionItem {
+    public var title: String { L10n.Message.Actions.userUnmute }
+    public let icon: UIImage
+    public let action: (ChatMessageActionItem) -> Void
+    
+    public init<ExtraData: ExtraDataTypes>(
+        action: @escaping (ChatMessageActionItem) -> Void,
+        uiConfig: _UIConfig<ExtraData> = .default
+    ) {
+        self.action = action
+        icon = uiConfig.images.messageActionMuteUser
     }
+}
 
-    static func unmuteUser(action: @escaping () -> Void, uiConfig: _UIConfig<ExtraData> = .default) -> Self {
-        .init(
-            title: L10n.Message.Actions.userUnmute,
-            icon: uiConfig.images.messageActionMuteUser,
-            action: action
-        )
+public struct DeleteActionItem: ChatMessageActionItem {
+    public var title: String { L10n.Message.Actions.delete }
+    public var isDestructive: Bool { true }
+    public let icon: UIImage
+    public let action: (ChatMessageActionItem) -> Void
+    
+    public init<ExtraData: ExtraDataTypes>(
+        action: @escaping (ChatMessageActionItem) -> Void,
+        uiConfig: _UIConfig<ExtraData> = .default
+    ) {
+        self.action = action
+        icon = uiConfig.images.messageActionDelete
     }
+}
 
-    static func delete(action: @escaping () -> Void, uiConfig: _UIConfig<ExtraData> = .default) -> Self {
-        .init(
-            title: L10n.Message.Actions.delete,
-            icon: uiConfig.images.messageActionDelete,
-            isDestructive: true,
-            action: action
-        )
-    }
-
-    static func resend(action: @escaping () -> Void, uiConfig: _UIConfig<ExtraData> = .default) -> Self {
-        .init(
-            title: L10n.Message.Actions.resend,
-            icon: uiConfig.images.messageActionResend,
-            isPrimary: true,
-            action: action
-        )
+public struct ResendActionItem: ChatMessageActionItem {
+    public var title: String { L10n.Message.Actions.resend }
+    public var isPrimary: Bool { true }
+    public let icon: UIImage
+    public let action: (ChatMessageActionItem) -> Void
+    
+    public init<ExtraData: ExtraDataTypes>(
+        action: @escaping (ChatMessageActionItem) -> Void,
+        uiConfig: _UIConfig<ExtraData> = .default
+    ) {
+        self.action = action
+        icon = uiConfig.images.messageActionResend
     }
 }

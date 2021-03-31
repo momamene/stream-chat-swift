@@ -11,7 +11,7 @@ public typealias ChatMessageActionsView = _ChatMessageActionsView<NoExtraData>
 /// It is shown in `_ChatMessagePopupVC` to show the defined action items
 open class _ChatMessageActionsView<ExtraData: ExtraDataTypes>: _View, UIConfigProvider {
     /// The data this view component shows.
-    public var content: [ChatMessageActionItem<ExtraData>] = [] {
+    public var content: [ChatMessageActionItem] = [] {
         didSet { updateContentIfNeeded() }
     }
 
