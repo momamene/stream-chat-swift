@@ -8,44 +8,53 @@ import UIKit
 public typealias ChatMessageComposerQuoteBubbleView = _ChatMessageComposerQuoteBubbleView<NoExtraData>
 
 open class _ChatMessageComposerQuoteBubbleView<ExtraData: ExtraDataTypes>: _View, UIConfigProvider {
-    // MARK: - Properties
-    
-    public var avatarViewSize: CGSize = .init(width: 24, height: 24)
-    public var attachmentPreviewSize: CGSize = .init(width: 34, height: 34)
-    
-    public var message: _ChatMessage<ExtraData>? {
+    /// Default avatar view size. Subclass this view and override this property to change the size.
+    open var authorAvatarViewSize: CGSize { .init(width: 24, height: 24) }
+
+    /// Default attachment preview size. Subclass this view and override this property to change the size.
+    open var attachmentPreviewSize: CGSize { .init(width: 34, height: 34) }
+
+    /// The quoted message this component shows.
+    public var content: _ChatMessage<ExtraData>? {
         didSet {
             updateContentIfNeeded()
         }
     }
-        
-    // MARK: - Subviews
-    
-    public private(set) lazy var container = UIStackView()
-        .withoutAutoresizingMaskConstraints
-    
-    public private(set) lazy var contentView = UIView()
-        .withoutAutoresizingMaskConstraints
-    
-    public private(set) lazy var authorAvatarView = uiConfig
-        .messageComposer
-        .quotedMessageAvatarView.init()
-        .withoutAutoresizingMaskConstraints
-    
-    public private(set) lazy var attachmentPreview = UIImageView()
+
+    /// The `UIStackView` that acts as a container view.
+    public private(set) lazy var container: UIStackView = UIStackView()
         .withoutAutoresizingMaskConstraints
 
-    public private(set) lazy var textView = UITextView()
+    /// The `UIView` that holds the textView.
+    public private(set) lazy var contentView: UIView = UIView()
         .withoutAutoresizingMaskConstraints
-    
-    // MARK: - Constraints
-    
-    public var containerConstraints: [NSLayoutConstraint] = []
-    public var authorAvatarViewConstraints: [NSLayoutConstraint] = []
-    public var attachmentPreviewConstraints: [NSLayoutConstraint] = []
-    public var textViewConstraints: [NSLayoutConstraint] = []
-    
-    // MARK: - Public
+
+    /// The `UITextView` that contains quoted message content.
+    public private(set) lazy var textView: UITextView = UITextView()
+        .withoutAutoresizingMaskConstraints
+
+    /// The avatar view of the author's quoted message.
+    public private(set) lazy var authorAvatarView: ChatAvatarView = uiConfig
+        .avatarView.init()
+        .withoutAutoresizingMaskConstraints
+
+    /// The attachment preview view if the quoted message has an attachment.
+    public private(set) lazy var attachmentPreview: UIImageView = UIImageView()
+        .withoutAutoresizingMaskConstraints
+
+    /// The `ChatChannelListItemView` layout constraints.
+    public struct Layout {
+        public var containerConstraints: [NSLayoutConstraint] = []
+        public var authorAvatarViewConstraints: [NSLayoutConstraint] = []
+        public var attachmentPreviewWidthConstraint: NSLayoutConstraint?
+        public var attachmentPreviewHeightConstraint: NSLayoutConstraint?
+        public var attachmentPreviewLeadingConstraint: NSLayoutConstraint?
+        public var attachmentPreviewConstraints: [NSLayoutConstraint] = []
+        public var textViewConstraints: [NSLayoutConstraint] = []
+    }
+
+    /// The `ChatChannelListItemView` layout constraints.
+    public private(set) var layout = Layout()
     
     override open func setUp() {
         super.setUp()
@@ -86,23 +95,23 @@ open class _ChatMessageComposerQuoteBubbleView<ExtraData: ExtraDataTypes>: _View
         container.spacing = UIStackView.spacingUseSystem
         container.alignment = .bottom
         
-        containerConstraints = [
+        layout.containerConstraints = [
             container.leadingAnchor.pin(equalTo: leadingAnchor, constant: directionalLayoutMargins.leading),
             container.trailingAnchor.pin(equalTo: trailingAnchor, constant: -directionalLayoutMargins.trailing),
             container.topAnchor.pin(equalTo: topAnchor, constant: directionalLayoutMargins.top),
             container.bottomAnchor.pin(equalTo: bottomAnchor, constant: -directionalLayoutMargins.bottom)
         ]
         
-        authorAvatarViewConstraints = [
-            authorAvatarView.widthAnchor.pin(equalToConstant: avatarViewSize.width),
-            authorAvatarView.heightAnchor.pin(equalToConstant: avatarViewSize.height)
+        layout.authorAvatarViewConstraints = [
+            authorAvatarView.widthAnchor.pin(equalToConstant: authorAvatarViewSize.width),
+            authorAvatarView.heightAnchor.pin(equalToConstant: authorAvatarViewSize.height)
         ]
         
         container.addArrangedSubview(authorAvatarView)
         
         contentView.addSubview(attachmentPreview)
         
-        attachmentPreviewConstraints = [
+        layout.attachmentPreviewConstraints = [
             attachmentPreview.widthAnchor.pin(equalToConstant: attachmentPreviewSize.width),
             attachmentPreview.heightAnchor.pin(equalToConstant: attachmentPreviewSize.height),
             attachmentPreview.leadingAnchor.pin(
@@ -115,10 +124,13 @@ open class _ChatMessageComposerQuoteBubbleView<ExtraData: ExtraDataTypes>: _View
                 constant: -contentView.directionalLayoutMargins.bottom
             )
         ]
+        layout.attachmentPreviewWidthConstraint = layout.attachmentPreviewConstraints[0]
+        layout.attachmentPreviewHeightConstraint = layout.attachmentPreviewConstraints[1]
+        layout.attachmentPreviewLeadingConstraint = layout.attachmentPreviewConstraints[2]
         
         contentView.addSubview(textView)
         
-        textViewConstraints = [
+        layout.textViewConstraints = [
             textView.topAnchor.pin(equalTo: contentView.topAnchor, constant: contentView.directionalLayoutMargins.top),
             textView.trailingAnchor.pin(
                 equalTo: contentView.trailingAnchor,
@@ -140,12 +152,15 @@ open class _ChatMessageComposerQuoteBubbleView<ExtraData: ExtraDataTypes>: _View
         container.addArrangedSubview(contentView)
         
         NSLayoutConstraint.activate(
-            [containerConstraints, authorAvatarViewConstraints, attachmentPreviewConstraints, textViewConstraints].flatMap { $0 }
+            layout.containerConstraints
+                + layout.authorAvatarViewConstraints
+                + layout.attachmentPreviewConstraints
+                + layout.textViewConstraints
         )
     }
     
     override open func updateContent() {
-        guard let message = message else { return }
+        guard let message = content else { return }
         
         let placeholder = uiConfig.images.userAvatarPlaceholder1
         if let imageURL = message.author.imageURL {
@@ -158,21 +173,7 @@ open class _ChatMessageComposerQuoteBubbleView<ExtraData: ExtraDataTypes>: _View
         updateAttachmentPreview(for: message)
     }
     
-    // MARK: - Helpers
-    
-    public func setAttachmentPreview(hidden: Bool) {
-        if hidden {
-            attachmentPreviewConstraints.prefix(3).forEach {
-                $0.constant = 0
-            }
-        } else {
-            attachmentPreviewConstraints[0].constant = attachmentPreviewSize.width
-            attachmentPreviewConstraints[1].constant = attachmentPreviewSize.height
-            attachmentPreviewConstraints[2].constant = contentView.directionalLayoutMargins.leading
-        }
-    }
-    
-    func updateAttachmentPreview(for message: _ChatMessage<ExtraData>) {
+    private func updateAttachmentPreview(for message: _ChatMessage<ExtraData>) {
         // TODO: Take last attachment when they'll be ordered.
         guard let attachment = message.attachments.first else {
             attachmentPreview.image = nil
@@ -203,6 +204,18 @@ open class _ChatMessageComposerQuoteBubbleView<ExtraData: ExtraDataTypes>: _View
                 attachmentPreview.image = nil
                 setAttachmentPreview(hidden: true)
             }
+        }
+    }
+
+    private func setAttachmentPreview(hidden: Bool) {
+        if hidden {
+            layout.attachmentPreviewWidthConstraint?.constant = 0
+            layout.attachmentPreviewHeightConstraint?.constant = 0
+            layout.attachmentPreviewLeadingConstraint?.constant = 0
+        } else {
+            layout.attachmentPreviewWidthConstraint?.constant = attachmentPreviewSize.width
+            layout.attachmentPreviewHeightConstraint?.constant = attachmentPreviewSize.height
+            layout.attachmentPreviewLeadingConstraint?.constant = contentView.directionalLayoutMargins.leading
         }
     }
 }

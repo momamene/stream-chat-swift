@@ -106,7 +106,7 @@ open class _ChatMessageComposerVC<ExtraData: ExtraDataTypes>: _ViewController,
             textView.placeholderLabel.text = L10n.Composer.Placeholder.message
             imageAttachments = []
             documentAttachments = []
-            composerView.quotedMessageView.message = nil
+            composerView.quotedMessageView.content = nil
             composerView.sendButton.mode = .new
             composerView.documentAttachmentsView.isHidden = true
             composerView.imageAttachmentsView.isHidden = true
@@ -126,7 +126,7 @@ open class _ChatMessageComposerVC<ExtraData: ExtraDataTypes>: _ViewController,
             composerView.stateIcon.image = image
             composerView.container.topStackView.setAnimatedly(hidden: false)
             composerView.quotedMessageView.setAnimatedly(hidden: false)
-            composerView.quotedMessageView.message = messageToQuote
+            composerView.quotedMessageView.content = messageToQuote
             composerView.invalidateIntrinsicContentSize()
         case let .edit(message):
             composerView.sendButton.mode = .edit

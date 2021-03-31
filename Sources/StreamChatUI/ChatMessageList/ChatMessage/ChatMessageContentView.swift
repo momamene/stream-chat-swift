@@ -675,7 +675,7 @@ open class _ChatMessageContentView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
         let quotedMessageView = self.quotedMessageView!
         
         quotedMessageView.isParentMessageSentByCurrentUser = message.isSentByCurrentUser
-        quotedMessageView.message = message.quotedMessage
+        quotedMessageView.content = message.quotedMessage
         quotedMessageView.isVisible = shouldDisplayQuotedMessage
     }
     

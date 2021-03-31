@@ -17,7 +17,7 @@ open class _ChatMessageQuoteBubbleView<ExtraData: ExtraDataTypes>: _ChatMessageC
     override open func setUpLayout() {
         super.setUpLayout()
         
-        containerConstraints.forEach {
+        layout.containerConstraints.forEach {
             $0.constant = 0
         }
     }
