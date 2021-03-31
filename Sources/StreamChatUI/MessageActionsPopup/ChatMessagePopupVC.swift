@@ -31,10 +31,12 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
     public var messageContentViewClass: _ChatMessageContentView<ExtraData>.Type!
     public var message: _ChatMessageGroupPart<ExtraData>!
     public var messageViewFrame: CGRect!
-    public var originalMessageView: UIView!
     public var actionsController: _ChatMessageActionsVC<ExtraData>!
     /// `_ChatMessageReactionsVC` instance for showing reactions.
     public var reactionsController: _ChatMessageReactionsVC<ExtraData>?
+    
+    /// Spacing between reactions, message, and actions
+    public var spacing: CGFloat = 8
     
     /// Layout properties of this view
     public private(set) var layout = Layout()
@@ -45,9 +47,9 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
         public fileprivate(set) var reactionsViewConstraints: [NSLayoutConstraint] = []
         /// Constraints of `actionsController.view`
         public fileprivate(set) var actionsViewConstraints: [NSLayoutConstraint] = []
+        /// Constraints of `messageContentView`
+        public fileprivate(set) var messageContentViewConstraints: [NSLayoutConstraint] = []
     }
-
-    private var spacing: CGFloat = 8
 
     // MARK: - Life Cycle
 
@@ -126,36 +128,39 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
                 actionsController.view.leadingAnchor.pin(equalTo: messageContentView.messageBubbleView!.leadingAnchor)
             )
         }
-
-        var constraints = [
-            scrollContentView.widthAnchor.pin(equalTo: view.widthAnchor),
-            
-            contentView.leadingAnchor.pin(equalTo: scrollContentView.leadingAnchor),
-            contentView.trailingAnchor.pin(equalTo: scrollContentView.trailingAnchor),
-            
+        
+        layout.messageContentViewConstraints = [
             messageContentView.topAnchor.pin(equalTo: contentView.topAnchor).almostRequired,
             messageContentView.widthAnchor.pin(equalToConstant: messageViewFrame.width),
             messageContentView.heightAnchor.pin(equalToConstant: messageViewFrame.height)
         ]
-
         if message.isSentByCurrentUser {
-            constraints += [
+            layout.messageContentViewConstraints.append(
                 messageContentView.trailingAnchor.pin(
                     equalTo: contentView.leadingAnchor,
                     constant: messageViewFrame.maxX
                 )
-            ]
+            )
         } else {
-            constraints += [
+            layout.messageContentViewConstraints.append(
                 messageContentView.leadingAnchor.pin(
                     equalTo: contentView.leadingAnchor,
                     constant: messageViewFrame.minX
                 )
-            ]
+            )
         }
 
+        let scrollContentViewConstraint = [
+            scrollContentView.widthAnchor.pin(equalTo: view.widthAnchor)
+        ]
+        
+        var contentViewConstraints = [
+            contentView.leadingAnchor.pin(equalTo: scrollContentView.leadingAnchor),
+            contentView.trailingAnchor.pin(equalTo: scrollContentView.trailingAnchor)
+        ]
+
         if messageViewFrame.minY <= 0 {
-            constraints += [
+            contentViewConstraints += [
                 contentView.topAnchor.pin(equalTo: scrollContentView.topAnchor),
                 contentView.bottomAnchor.pin(
                     equalTo: scrollContentView.bottomAnchor,
@@ -163,7 +168,7 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
                 )
             ]
         } else {
-            constraints += [
+            contentViewConstraints += [
                 contentView.topAnchor.pin(
                     equalTo: scrollContentView.topAnchor,
                     constant: messageViewFrame.minY - (reactionsController?.view.frame.height ?? 0) - spacing
@@ -173,9 +178,11 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
         }
 
         NSLayoutConstraint.activate(
-            constraints
+            layout.messageContentViewConstraints
                 + layout.reactionsViewConstraints
                 + layout.actionsViewConstraints
+                + scrollContentViewConstraint
+                + contentViewConstraints
         )
     }
 
