@@ -20,6 +20,7 @@ open class _ChatMessageActionsView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
         .withoutAutoresizingMaskConstraints
 
     override public func defaultAppearance() {
+        super.defaultAppearance()
         stackView.axis = .vertical
         stackView.alignment = .fill
         stackView.distribution = .fill

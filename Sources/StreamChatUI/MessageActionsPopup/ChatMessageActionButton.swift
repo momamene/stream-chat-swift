@@ -15,6 +15,7 @@ open class _ChatMessageActionButton<ExtraData: ExtraDataTypes>: _Button, UIConfi
     }
 
     override public func defaultAppearance() {
+        super.defaultAppearance()
         backgroundColor = uiConfig.colorPalette.background
         titleLabel?.font = uiConfig.font.body
         contentEdgeInsets = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 32)
@@ -53,7 +54,7 @@ open class _ChatMessageActionButton<ExtraData: ExtraDataTypes>: _Button, UIConfi
     
     /// Triggered when `ActionButton` is tapped
     @objc open func touchUpInsideHandler(_ sender: Any) {
-        guard let content = content else { return }
+        guard let content = content else { return assertionFailure("Content is unexpectedly nil") }
         content.action(content)
     }
 }

@@ -74,6 +74,7 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
     }
 
     override public func defaultAppearance() {
+        super.defaultAppearance()
         view.backgroundColor = .clear
         blurView.alpha = 0
 
@@ -121,8 +122,6 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
                     reactionsController.reactionsBubble.tailLeadingAnchor.pin(equalTo: messageContentView.trailingAnchor)
                 ]
             }
-            
-            reactionsController.view.layoutIfNeeded()
         }
         
         layout.actionsViewConstraints = [
@@ -180,6 +179,7 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
                 )
             ]
         } else {
+            reactionsController?.view.layoutIfNeeded()
             contentViewConstraints += [
                 contentView.topAnchor.pin(
                     equalTo: scrollContentView.topAnchor,
