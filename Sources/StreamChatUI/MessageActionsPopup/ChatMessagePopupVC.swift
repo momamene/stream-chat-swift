@@ -7,13 +7,20 @@ import UIKit
 
 public typealias ChatMessagePopupVC = _ChatMessagePopupVC<NoExtraData>
 
+/// `_ChatMessagePopupVC` is shown when user long-presses a message
+/// By default, it has a blurred background, reactions, and actions which are shown for a given message
+/// and with which user can interact
 open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UIConfigProvider {
+    /// `UIScrollView` for showing content and updating its position via setting its content offset
     public private(set) lazy var scrollView = UIScrollView()
         .withoutAutoresizingMaskConstraints
+    /// `UIView` embedded in `scrollView`
     public private(set) lazy var scrollContentView = UIView()
         .withoutAutoresizingMaskConstraints
+    /// `contentView` encapsulating underlying views `reactionsController`, `actionsController` and `messageContentView`
     public private(set) lazy var contentView = UIView()
         .withoutAutoresizingMaskConstraints
+    /// `UIView` with `UIBlurEffect` that is shown as a background
     public private(set) lazy var blurView: UIView = {
         let blur: UIBlurEffect
         if #available(iOS 13.0, *) {
@@ -25,12 +32,17 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
             .withoutAutoresizingMaskConstraints
     }()
 
+    /// New instance of `messageContentViewClass` that is populated with `message` data
     public private(set) lazy var messageContentView = messageContentViewClass.init()
         .withoutAutoresizingMaskConstraints
 
+    /// `messageContentView` class that is populated with `message` and shown
     public var messageContentViewClass: _ChatMessageContentView<ExtraData>.Type!
+    /// Message data that is shown
     public var message: _ChatMessageGroupPart<ExtraData>!
+    /// Initial frame of a message
     public var messageViewFrame: CGRect!
+    /// `__ChatMessageActionsVC` instance for showing actions
     public var actionsController: _ChatMessageActionsVC<ExtraData>!
     /// `_ChatMessageReactionsVC` instance for showing reactions.
     public var reactionsController: _ChatMessageReactionsVC<ExtraData>?
@@ -221,6 +233,7 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
         }
     }
     
+    /// Computes initial content offset of `scrollView` for initial possition of its contents
     open func applyInitialContentOffset() {
         let contentOffset = CGPoint(
             x: 0,
@@ -229,11 +242,13 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
         scrollView.setContentOffset(contentOffset, animated: false)
     }
 
+    /// Updates`scrollView.contentOffset`, so that `contentView` si visible
     open func scrollToMakeMessageVisible() {
         let contentRect = scrollContentView.convert(contentView.frame, to: scrollView)
         scrollView.scrollRectToVisible(contentRect, animated: false)
     }
 
+    /// Triggered when `blurView` is tapped
     @objc open func didTapOnOverlay() {
         dismiss(animated: true)
     }
