@@ -41,11 +41,12 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
     
     /// Properties tied to `_ChatMessagePopupVC` layout
     public struct Layout {
+        /// Constraints of `reactionsController.view`
         public fileprivate(set) var reactionsViewConstraints: [NSLayoutConstraint] = []
+        /// Constraints of `actionsController.view`
+        public fileprivate(set) var actionsViewConstraints: [NSLayoutConstraint] = []
     }
 
-    private var actionsView: UIView { actionsController.view }
-    private var actionsViewHeight: CGFloat { CGFloat(actionsController.messageActions.count) * 40 }
     private var spacing: CGFloat = 8
 
     // MARK: - Life Cycle
@@ -65,8 +66,8 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
         reactionsController?.view.alpha = 0
         reactionsController?.view.transform = .init(scaleX: 0.5, y: 0.5)
         
-        actionsView.alpha = 0
-        actionsView.transform = .init(scaleX: 0.5, y: 0.5)
+        actionsController.view.alpha = 0
+        actionsController.view.transform = .init(scaleX: 0.5, y: 0.5)
     }
 
     override open func setUpLayout() {
@@ -109,6 +110,22 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
             
             reactionsController.view.layoutIfNeeded()
         }
+        
+        layout.actionsViewConstraints = [
+            actionsController.view.topAnchor.pin(equalTo: messageContentView.bottomAnchor, constant: spacing),
+            actionsController.view.widthAnchor.pin(equalTo: contentView.widthAnchor, multiplier: 0.7),
+            actionsController.view.bottomAnchor.pin(lessThanOrEqualTo: scrollContentView.bottomAnchor)
+        ]
+        
+        if message.isSentByCurrentUser {
+            layout.actionsViewConstraints.append(
+                actionsController.view.trailingAnchor.pin(equalTo: messageContentView.trailingAnchor)
+            )
+        } else {
+            layout.actionsViewConstraints.append(
+                actionsController.view.leadingAnchor.pin(equalTo: messageContentView.messageBubbleView!.leadingAnchor)
+            )
+        }
 
         var constraints = [
             scrollContentView.widthAnchor.pin(equalTo: view.widthAnchor),
@@ -118,11 +135,7 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
             
             messageContentView.topAnchor.pin(equalTo: contentView.topAnchor).almostRequired,
             messageContentView.widthAnchor.pin(equalToConstant: messageViewFrame.width),
-            messageContentView.heightAnchor.pin(equalToConstant: messageViewFrame.height),
-            
-            actionsView.topAnchor.pin(equalTo: messageContentView.bottomAnchor, constant: spacing),
-            actionsView.widthAnchor.pin(equalTo: contentView.widthAnchor, multiplier: 0.7),
-            actionsView.bottomAnchor.pin(lessThanOrEqualTo: scrollContentView.bottomAnchor)
+            messageContentView.heightAnchor.pin(equalToConstant: messageViewFrame.height)
         ]
 
         if message.isSentByCurrentUser {
@@ -130,16 +143,14 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
                 messageContentView.trailingAnchor.pin(
                     equalTo: contentView.leadingAnchor,
                     constant: messageViewFrame.maxX
-                ),
-                actionsView.trailingAnchor.pin(equalTo: messageContentView.trailingAnchor)
+                )
             ]
         } else {
             constraints += [
                 messageContentView.leadingAnchor.pin(
                     equalTo: contentView.leadingAnchor,
                     constant: messageViewFrame.minX
-                ),
-                actionsView.leadingAnchor.pin(equalTo: messageContentView.messageBubbleView!.leadingAnchor)
+                )
             ]
         }
 
@@ -148,7 +159,7 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
                 contentView.topAnchor.pin(equalTo: scrollContentView.topAnchor),
                 contentView.bottomAnchor.pin(
                     equalTo: scrollContentView.bottomAnchor,
-                    constant: -(view.bounds.height - messageViewFrame.maxY - actionsViewHeight - spacing)
+                    constant: -(view.bounds.height - messageViewFrame.maxY - actionsController.view.frame.height - spacing)
                 )
             ]
         } else {
@@ -164,6 +175,7 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
         NSLayoutConstraint.activate(
             constraints
                 + layout.reactionsViewConstraints
+                + layout.actionsViewConstraints
         )
     }
 
@@ -191,8 +203,8 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
                 self.scrollToMakeMessageVisible()
                 self.blurView.alpha = 1
 
-                self.actionsView.alpha = 1
-                self.actionsView.transform = .identity
+                self.actionsController.view.alpha = 1
+                self.actionsController.view.transform = .identity
             }
             
             Animate(delay: 0.1) {
