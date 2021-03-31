@@ -34,18 +34,21 @@ class ChatUserAvatarView_Tests: XCTestCase {
     }
 
     func test_appearanceCustomization_usingUIConfig() {
-        class RectIndicator: UIView {
+        class RectIndicator: UIView, MaskProviding {
             override func didMoveToSuperview() {
                 super.didMoveToSuperview()
                 backgroundColor = .systemPink
                 widthAnchor.constraint(equalTo: heightAnchor, multiplier: 1).isActive = true
+            }
+            
+            var maskingPath: CGPath? {
+                UIBezierPath(rect: frame.insetBy(dx: -frame.width / 4, dy: -frame.height / 4)).cgPath
             }
         }
 
         var config = UIConfig()
         config.onlineIndicatorView = RectIndicator.self
         config.colorPalette.alternativeActiveTint = .brown
-        config.colorPalette.lightBorder = .cyan
 
         let view = ChatUserAvatarView().withoutAutoresizingMaskConstraints
         view.addSizeConstraints()
@@ -70,12 +73,23 @@ class ChatUserAvatarView_Tests: XCTestCase {
     func test_appearanceCustomization_usingSubclassing() {
         class TestView: ChatUserAvatarView {
             override func setUpAppearance() {
+                super.setUpAppearance()
+                
                 presenceAvatarView.onlineIndicatorView.backgroundColor = .red
                 backgroundColor = .yellow
             }
 
             override func setUpLayout() {
                 super.setUpLayout()
+                
+                presenceAvatarView.constraints
+                    .filter { (constraint: NSLayoutConstraint) in
+                        constraint.firstItem as! NSObject == presenceAvatarView.onlineIndicatorView
+                            || constraint.secondItem as! NSObject == presenceAvatarView.onlineIndicatorView
+                    }
+                    .filter { $0.firstAttribute != .width }
+                    .forEach { $0.isActive = false }
+                
                 NSLayoutConstraint.activate([
                     presenceAvatarView.onlineIndicatorView.leftAnchor.constraint(equalTo: leftAnchor),
                     presenceAvatarView.onlineIndicatorView.bottomAnchor.constraint(equalTo: bottomAnchor),
