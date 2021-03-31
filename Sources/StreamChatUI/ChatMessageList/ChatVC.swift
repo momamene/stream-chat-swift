@@ -101,13 +101,12 @@ open class _ChatVC<ExtraData: ExtraDataTypes>: _ViewController,
 
         view.backgroundColor = uiConfig.colorPalette.background
         
-        let titleView = ChatMessageListTitleView<ExtraData>()
+        let titleView = _ChatMessageListTitleView<ExtraData>()
 
         navigationItem.titleView = titleView
 
         navbarListener = makeNavbarListener { data in
-            titleView.title = data.title
-            titleView.subtitle = data.subtitle
+            titleView.content = data
         }
     }
 
