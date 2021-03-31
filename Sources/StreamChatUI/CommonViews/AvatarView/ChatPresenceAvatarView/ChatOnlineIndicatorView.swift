@@ -5,27 +5,27 @@
 import StreamChat
 import UIKit
 
+public protocol MaskProviding {
+    /// Path used to mask space in super view.
+    ///
+    /// No mask is used when nil is returned
+    var maskingPath: CGPath? { get }
+}
+
 /// A view used to indicate the presence of a user.
 public typealias ChatOnlineIndicatorView = _ChatOnlineIndicatorView<NoExtraData>
 
 /// A view used to indicate the presence of a user.
-open class _ChatOnlineIndicatorView<ExtraData: ExtraDataTypes>: _View, UIConfigProvider {
-    open private(set) lazy var indicatorView: UIView = UIView()
-        .withoutAutoresizingMaskConstraints
-    
+open class _ChatOnlineIndicatorView<ExtraData: ExtraDataTypes>: _View, UIConfigProvider, MaskProviding {
     override public func defaultAppearance() {
         super.defaultAppearance()
 
-        backgroundColor = .clear
-        indicatorView.backgroundColor = uiConfig.colorPalette.alternativeActiveTint
+        backgroundColor = uiConfig.colorPalette.alternativeActiveTint
     }
 
     override open func setUpLayout() {
         super.setUpLayout()
         heightAnchor.pin(equalTo: widthAnchor).isActive = true
-        
-        let borderWidth: CGFloat = 2
-        embed(indicatorView, insets: .init(top: borderWidth, leading: borderWidth, bottom: borderWidth, trailing: borderWidth))
     }
 
     override open func layoutSubviews() {

@@ -16,7 +16,10 @@ open class _ChatPresenceAvatarView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
         .withoutAutoresizingMaskConstraints
 
     /// A view indicating whether the user this view represents is online.
-    open private(set) lazy var onlineIndicatorView: _ChatOnlineIndicatorView<ExtraData> = uiConfig
+    ///
+    /// The type of `onlineIndicatorView` is UIView & MaskProviding in UIConfig.
+    /// Xcode is failing to compile due to `Segmentation fault: 11` when used here.
+    open private(set) lazy var onlineIndicatorView: UIView = uiConfig
         .onlineIndicatorView.init()
         .withoutAutoresizingMaskConstraints
     
@@ -55,7 +58,7 @@ open class _ChatPresenceAvatarView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
     open func setUpMask(indicatorVisible: Bool) {
         guard
             indicatorVisible,
-            let path = onlineIndicatorView.maskingPath?.mutableCopy()
+            let path = (onlineIndicatorView as? MaskProviding)?.maskingPath?.mutableCopy()
         else { return avatarView.layer.mask = nil }
         
         path.addRect(bounds)
