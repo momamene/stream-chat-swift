@@ -91,7 +91,7 @@ class ChatMessageActionsView_Tests: XCTestCase {
     }
     
     func test_ItemView_usesCorrectUIConfigTypes_whenCustomTypesDefined() {
-        class TestActionButton: ChatMessageActionsView.ActionButton {}
+        class TestActionButton: ChatMessageActionButton {}
         
         // Create default `ChatMessageActionsView` which has everything default from `UIConfig`
         let view = ChatMessageActionsView()

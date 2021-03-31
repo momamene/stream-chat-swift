@@ -23,8 +23,8 @@ public extension _UIConfig {
     struct MessageActionsSubviews {
         public var actionsView: _ChatMessageActionsView<ExtraData>.Type =
             _ChatMessageActionsView<ExtraData>.self
-        public var actionButton: _ChatMessageActionsView<ExtraData>.ActionButton.Type =
-            _ChatMessageActionsView<ExtraData>.ActionButton.self
+        public var actionButton: _ChatMessageActionButton<ExtraData>.Type =
+            _ChatMessageActionButton<ExtraData>.self
     }
 
     struct MessageReactions {
