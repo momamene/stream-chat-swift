@@ -24,11 +24,6 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
         return UIVisualEffectView(effect: blur)
             .withoutAutoresizingMaskConstraints
     }()
-    
-    /// Properties tied to `_ChatMessagePopupVC` layout
-    public struct Layout {
-        public private(set) var reactionsViewConstraints: [NSLayoutConstraint] = []
-    }
 
     public private(set) lazy var messageContentView = messageContentViewClass.init()
         .withoutAutoresizingMaskConstraints
@@ -40,11 +35,17 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
     public var actionsController: _ChatMessageActionsVC<ExtraData>!
     /// `_ChatMessageReactionsVC` instance for showing reactions.
     public var reactionsController: _ChatMessageReactionsVC<ExtraData>?
+    
+    /// Layout properties of this view
+    public private(set) var layout = Layout()
+    
+    /// Properties tied to `_ChatMessagePopupVC` layout
+    public struct Layout {
+        public fileprivate(set) var reactionsViewConstraints: [NSLayoutConstraint] = []
+    }
 
     private var actionsView: UIView { actionsController.view }
     private var actionsViewHeight: CGFloat { CGFloat(actionsController.messageActions.count) * 40 }
-    private var reactionsView: UIView? { reactionsController?.view }
-    private var reactionsViewHeight: CGFloat { reactionsView == nil ? 0 : 40 }
     private var spacing: CGFloat = 8
 
     // MARK: - Life Cycle
@@ -61,8 +62,8 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
         view.backgroundColor = .clear
         blurView.alpha = 0
 
-        reactionsView?.alpha = 0
-        reactionsView?.transform = .init(scaleX: 0.5, y: 0.5)
+        reactionsController?.view.alpha = 0
+        reactionsController?.view.transform = .init(scaleX: 0.5, y: 0.5)
         
         actionsView.alpha = 0
         actionsView.transform = .init(scaleX: 0.5, y: 0.5)
@@ -83,18 +84,37 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
         scrollView.embed(scrollContentView)
         view.embed(blurView)
         view.embed(scrollView)
+        
+        if let reactionsController = reactionsController {
+            layout.reactionsViewConstraints = [
+                reactionsController.view.topAnchor.pin(equalTo: contentView.topAnchor),
+                reactionsController.view.leadingAnchor.pin(greaterThanOrEqualTo: contentView.leadingAnchor),
+                reactionsController.view.trailingAnchor.pin(lessThanOrEqualTo: contentView.trailingAnchor),
+                reactionsController.view.bottomAnchor.pin(equalTo: messageContentView.topAnchor, constant: -spacing)
+            ]
+            
+            if message.isSentByCurrentUser {
+                layout.reactionsViewConstraints += [
+                    reactionsController.view.centerXAnchor.pin(equalTo: messageContentView.leadingAnchor)
+                        .with(priority: .defaultHigh),
+                    reactionsController.reactionsBubble.tailTrailingAnchor.pin(equalTo: messageContentView.leadingAnchor)
+                ]
+            } else {
+                layout.reactionsViewConstraints += [
+                    reactionsController.view.centerXAnchor.pin(equalTo: messageContentView.trailingAnchor)
+                        .with(priority: .defaultHigh),
+                    reactionsController.reactionsBubble.tailLeadingAnchor.pin(equalTo: messageContentView.trailingAnchor)
+                ]
+            }
+            
+            reactionsController.view.layoutIfNeeded()
+        }
 
         var constraints = [
             scrollContentView.widthAnchor.pin(equalTo: view.widthAnchor),
             
             contentView.leadingAnchor.pin(equalTo: scrollContentView.leadingAnchor),
             contentView.trailingAnchor.pin(equalTo: scrollContentView.trailingAnchor),
-            
-            reactionsView?.heightAnchor.pin(equalToConstant: reactionsViewHeight),
-            reactionsView?.topAnchor.pin(equalTo: contentView.topAnchor),
-            reactionsView?.leadingAnchor.pin(greaterThanOrEqualTo: contentView.leadingAnchor),
-            reactionsView?.trailingAnchor.pin(lessThanOrEqualTo: contentView.trailingAnchor),
-            reactionsView?.bottomAnchor.pin(equalTo: messageContentView.topAnchor, constant: -spacing),
             
             messageContentView.topAnchor.pin(equalTo: contentView.topAnchor).almostRequired,
             messageContentView.widthAnchor.pin(equalToConstant: messageViewFrame.width),
@@ -111,10 +131,7 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
                     equalTo: contentView.leadingAnchor,
                     constant: messageViewFrame.maxX
                 ),
-                actionsView.trailingAnchor.pin(equalTo: messageContentView.trailingAnchor),
-                reactionsView?.centerXAnchor.pin(equalTo: messageContentView.leadingAnchor)
-                    .with(priority: .defaultHigh),
-                reactionsController?.reactionsBubble.tailTrailingAnchor.pin(equalTo: messageContentView.leadingAnchor)
+                actionsView.trailingAnchor.pin(equalTo: messageContentView.trailingAnchor)
             ]
         } else {
             constraints += [
@@ -122,10 +139,7 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
                     equalTo: contentView.leadingAnchor,
                     constant: messageViewFrame.minX
                 ),
-                actionsView.leadingAnchor.pin(equalTo: messageContentView.messageBubbleView!.leadingAnchor),
-                reactionsView?.centerXAnchor.pin(equalTo: messageContentView.trailingAnchor)
-                    .with(priority: .defaultHigh),
-                reactionsController?.reactionsBubble.tailLeadingAnchor.pin(equalTo: messageContentView.trailingAnchor)
+                actionsView.leadingAnchor.pin(equalTo: messageContentView.messageBubbleView!.leadingAnchor)
             ]
         }
 
@@ -141,13 +155,16 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
             constraints += [
                 contentView.topAnchor.pin(
                     equalTo: scrollContentView.topAnchor,
-                    constant: messageViewFrame.minY - reactionsViewHeight - spacing
+                    constant: messageViewFrame.minY - (reactionsController?.view.frame.height ?? 0) - spacing
                 ),
                 contentView.bottomAnchor.pin(equalTo: scrollContentView.bottomAnchor)
             ]
         }
 
-        NSLayoutConstraint.activate(constraints.compactMap { $0 })
+        NSLayoutConstraint.activate(
+            constraints
+                + layout.reactionsViewConstraints
+        )
     }
 
     override open func updateContent() {
@@ -171,7 +188,7 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
             self.applyInitialContentOffset()
             
             Animate {
-                self.scrollToMakeMessageVisible() // Makes the animation look a bit weird, but it's much faster...
+                self.scrollToMakeMessageVisible()
                 self.blurView.alpha = 1
 
                 self.actionsView.alpha = 1
@@ -179,14 +196,17 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
             }
             
             Animate(delay: 0.1) {
-                self.reactionsView?.alpha = 1
-                self.reactionsView?.transform = .identity
+                self.reactionsController?.view.alpha = 1
+                self.reactionsController?.view.transform = .identity
             }
         }
     }
     
     open func applyInitialContentOffset() {
-        let contentOffset = CGPoint(x: 0, y: max(0, -messageViewFrame.minY + spacing + reactionsViewHeight))
+        let contentOffset = CGPoint(
+            x: 0,
+            y: max(0, -messageViewFrame.minY + spacing + (reactionsController?.view.frame.height ?? 0))
+        )
         scrollView.setContentOffset(contentOffset, animated: false)
     }
 
@@ -194,8 +214,6 @@ open class _ChatMessagePopupVC<ExtraData: ExtraDataTypes>: _ViewController, UICo
         let contentRect = scrollContentView.convert(contentView.frame, to: scrollView)
         scrollView.scrollRectToVisible(contentRect, animated: false)
     }
-
-    // MARK: - Actions
 
     @objc open func didTapOnOverlay() {
         dismiss(animated: true)
