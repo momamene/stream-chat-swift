@@ -33,13 +33,9 @@ open class _ChatOnlineIndicatorView<ExtraData: ExtraDataTypes>: _View, UIConfigP
         
         layer.cornerRadius = bounds.width / 2
         layer.masksToBounds = true
-        
-        indicatorView.layer.cornerRadius = indicatorView.bounds.width / 2
-        indicatorView.layer.masksToBounds = true
     }
     
-    /// Path used to mask space in super view.
     open var maskingPath: CGPath? {
-        UIBezierPath(ovalIn: frame).cgPath
+        UIBezierPath(ovalIn: frame.insetBy(dx: -frame.width/4, dy: -frame.height/4)).cgPath
     }
 }
