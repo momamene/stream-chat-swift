@@ -21,10 +21,10 @@ open class _ChatPresenceAvatarView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
         .withoutAutoresizingMaskConstraints
     
     /// Bool to determine if the indicator should be shown.
-    open var showOnlineIndicator: Bool = false {
+    open var isOnlineIndicatorVisible: Bool = false {
         didSet {
-            onlineIndicatorView.isVisible = showOnlineIndicator
-            setUpMask(indicatorVisible: showOnlineIndicator)
+            onlineIndicatorView.isVisible = isOnlineIndicatorVisible
+            setUpMask(indicatorVisible: isOnlineIndicatorVisible)
         }
     }
 
@@ -47,7 +47,7 @@ open class _ChatPresenceAvatarView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
     override open func layoutSubviews() {
         super.layoutSubviews()
         
-        setUpMask(indicatorVisible: showOnlineIndicator)
+        setUpMask(indicatorVisible: isOnlineIndicatorVisible)
     }
     
     /// Creates space for indicator view in avatar view by masking path provided by the indicator view.
