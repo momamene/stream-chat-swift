@@ -19,6 +19,8 @@ public extension _UIConfig {
         public var messageContentSubviews = MessageContentViewSubviews()
         public var messageActionsSubviews = MessageActionsSubviews()
         public var messageReactions = MessageReactions()
+        
+        public var titleView: _ChatMessageListTitleView<ExtraData>.Type = _ChatMessageListTitleView<ExtraData>.self
     }
 
     struct MessageActionsSubviews {
