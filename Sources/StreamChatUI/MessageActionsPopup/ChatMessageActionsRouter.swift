@@ -7,7 +7,11 @@ import UIKit
 
 public typealias ChatMessageActionsRouter = _ChatMessageActionsRouter<NoExtraData>
 
+/// `ChatRouter` instance for routing of chat message actions
 open class _ChatMessageActionsRouter<ExtraData: ExtraDataTypes>: ChatRouter<_ChatMessageActionsVC<ExtraData>> {
+    /// Method for showing alert with confirmation of whether a message should be deleted
+    /// - Parameters:
+    ///     - confirmed: Completion closure with a `Bool` parameter indicating whether the deletion has been confirmed or not
     open func showMessageDeletionConfirmationAlert(confirmed: @escaping (Bool) -> Void) {
         let alert = UIAlertController(
             title: L10n.Message.Actions.Delete.confirmationTitle,

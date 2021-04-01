@@ -25,23 +25,19 @@ open class _ChatMessageActionsVC<ExtraData: ExtraDataTypes>: _ViewController, UI
     /// `_ChatMessageActionsVC.Delegate` instance
     public var delegate: Delegate?
 
+    /// Message that should be shown in this view controller
+    open var message: _ChatMessage<ExtraData>? {
+        messageController.message
+    }
+    
     /// The `_ChatMessageActionsRouter` instance responsible for navigation.
     open private(set) lazy var router = uiConfig
         .navigation
         .messageActionsRouter
         .init(rootViewController: self)
 
-    /// Message that should be shown in this view controller
-    open var message: _ChatMessage<ExtraData>? {
-        messageController.message
-    }
-
     /// The `_ChatMessageActionsView` instance for showing message's actions
-    open private(set) lazy var messageActionView = uiConfig
-        .messageList
-        .messageActionsSubviews
-        .actionsView
-        .init()
+    open private(set) lazy var messageActionView = _ChatMessageActionsView<ExtraData>()
         .withoutAutoresizingMaskConstraints
 
     override open func setUpLayout() {
@@ -121,18 +117,21 @@ open class _ChatMessageActionsVC<ExtraData: ExtraDataTypes>: _ViewController, UI
             return []
         }
     }
-
+    
+    /// Triggered when `CopyActionItem` is tapped
     open func handleCopyAction() {
         UIPasteboard.general.string = message?.text
 
         delegate?.didFinish(self)
     }
     
+    /// Triggered for actions which should be handled by `delegate` and not in this view controller
     open func handleAction(_ actionItem: ChatMessageActionItem) {
         guard let message = message else { return }
         delegate?.didTapOnActionItem(self, message, actionItem)
     }
 
+    /// Triggered when `DeleteActionItem` is tapped
     open func handleDeleteAction() {
         router.showMessageDeletionConfirmationAlert { confirmed in
             guard confirmed else { return }
@@ -143,12 +142,14 @@ open class _ChatMessageActionsVC<ExtraData: ExtraDataTypes>: _ViewController, UI
         }
     }
 
+    /// Triggered when `ResendActionItem` is tapped
     open func handleResendAction() {
         messageController.resendMessage { _ in
             self.delegate?.didFinish(self)
         }
     }
 
+    /// Triggered when `MuteActionItem` is tapped
     open func handleMuteAuthorAction() {
         guard let author = message?.author else { return }
 
@@ -157,6 +158,7 @@ open class _ChatMessageActionsVC<ExtraData: ExtraDataTypes>: _ViewController, UI
             .mute { _ in self.delegate?.didFinish(self) }
     }
 
+    /// Triggered when `UnmuteActionItem` is tapped
     open func handleUnmuteAuthorAction() {
         guard let author = message?.author else { return }
 
@@ -169,10 +171,15 @@ open class _ChatMessageActionsVC<ExtraData: ExtraDataTypes>: _ViewController, UI
 // MARK: - Delegate
 
 public extension _ChatMessageActionsVC {
+    /// Delegate instance for `_ChatMessageActionsVC`
     struct Delegate {
+        /// Triggered when action item was tapped
+        /// You can decide what to do with message based on which instance of `ChatMessageActionItem` you received
         public var didTapOnActionItem: (_ChatMessageActionsVC, _ChatMessage<ExtraData>, ChatMessageActionItem) -> Void
+        /// Triggered when `_ChatMessageActionsVC` should be dismissed
         public var didFinish: (_ChatMessageActionsVC) -> Void
 
+        /// Init of `_ChatMessageActionsVC.Delegate`
         public init(
             didTapOnActionItem: @escaping (_ChatMessageActionsVC, _ChatMessage<ExtraData>, ChatMessageActionItem)
                 -> Void = { _, _, _ in },
@@ -182,6 +189,7 @@ public extension _ChatMessageActionsVC {
             self.didFinish = didFinish
         }
 
+        /// Wraps `_ChatMessageActionsVCDelegate` into `_ChatMessageActionsVC.Delegate`
         public init<Delegate: _ChatMessageActionsVCDelegate>(delegate: Delegate) where Delegate.ExtraData == ExtraData {
             self.init(
                 didTapOnActionItem: { [weak delegate] in delegate?.chatMessageActionsVC($0, message: $1, didTapOnActionItem: $2) },

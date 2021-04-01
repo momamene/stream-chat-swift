@@ -5,6 +5,7 @@
 import StreamChat
 import UIKit
 
+/// Button for action displayed in `_ChatMessageActionsView`
 public typealias ChatMessageActionButton = _ChatMessageActionButton<NoExtraData>
 
 /// Button for action displayed in `_ChatMessageActionsView`

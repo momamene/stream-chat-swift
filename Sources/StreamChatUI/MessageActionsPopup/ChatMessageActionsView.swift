@@ -5,6 +5,8 @@
 import StreamChat
 import UIKit
 
+/// View that contains `_ChatMessageActionItem`s
+/// It is shown in `_ChatMessagePopupVC` to show the defined action items
 public typealias ChatMessageActionsView = _ChatMessageActionsView<NoExtraData>
 
 /// View that contains `_ChatMessageActionItem`s
@@ -16,8 +18,12 @@ open class _ChatMessageActionsView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
     }
 
     /// Stack view with action items
-    public private(set) lazy var stackView: UIStackView = UIStackView()
+    open private(set) lazy var stackView: UIStackView = UIStackView()
         .withoutAutoresizingMaskConstraints
+    
+    /// Class used for buttons in `stackView`
+    open private(set) lazy var actionButtonClass: _ChatMessageActionButton<ExtraData>.Type = _ChatMessageActionButton<ExtraData>
+        .self
 
     override public func defaultAppearance() {
         super.defaultAppearance()
@@ -42,7 +48,7 @@ open class _ChatMessageActionsView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
         }
 
         content.forEach {
-            let actionView = uiConfig.messageList.messageActionsSubviews.actionButton.init()
+            let actionView = actionButtonClass.init()
             actionView.content = $0
             stackView.addArrangedSubview(actionView)
         }

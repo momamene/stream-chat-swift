@@ -16,16 +16,15 @@ public extension _UIConfig {
         public var collectionLayout: ChatMessageListCollectionViewLayout.Type = ChatMessageListCollectionViewLayout.self
         public var channelNamer: ChatChannelNamer<ExtraData> = DefaultChatChannelNamer()
         public var messageContentSubviews = MessageContentViewSubviews()
-        public var messageActionsSubviews = MessageActionsSubviews()
         public var messageReactions = MessageReactions()
     }
 
-    struct MessageActionsSubviews {
-        public var actionsView: _ChatMessageActionsView<ExtraData>.Type =
-            _ChatMessageActionsView<ExtraData>.self
-        public var actionButton: _ChatMessageActionButton<ExtraData>.Type =
-            _ChatMessageActionButton<ExtraData>.self
-    }
+//    struct MessageActionsSubviews {
+//        public var actionsView: _ChatMessageActionsView<ExtraData>.Type =
+//            _ChatMessageActionsView<ExtraData>.self
+//        public var actionButton: _ChatMessageActionButton<ExtraData>.Type =
+//            _ChatMessageActionButton<ExtraData>.self
+//    }
 
     struct MessageReactions {
         public var reactionsBubbleView: _ChatMessageReactionsBubbleView<ExtraData>.Type =
