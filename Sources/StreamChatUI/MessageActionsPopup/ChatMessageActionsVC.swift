@@ -31,6 +31,7 @@ open class _ChatMessageActionsVC<ExtraData: ExtraDataTypes>: _ViewController, UI
         .messageActionsRouter
         .init(rootViewController: self)
 
+    /// Message that should be shown in this view controller
     open var message: _ChatMessage<ExtraData>? {
         messageController.message
     }

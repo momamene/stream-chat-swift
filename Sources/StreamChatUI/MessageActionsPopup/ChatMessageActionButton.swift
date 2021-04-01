@@ -52,7 +52,7 @@ open class _ChatMessageActionButton<ExtraData: ExtraDataTypes>: _Button, UIConfi
         setTitleColor(titleTextColor, for: .normal)
     }
     
-    /// Triggered when `ActionButton` is tapped
+    /// Triggered when `_ChatMessageActionButton` is tapped
     @objc open func touchUpInsideHandler(_ sender: Any) {
         guard let content = content else { return assertionFailure("Content is unexpectedly nil") }
         content.action(content)
