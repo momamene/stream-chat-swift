@@ -43,10 +43,10 @@ open class _ChatPresenceAvatarView<ExtraData: ExtraDataTypes>: _View, UIConfigPr
         addSubview(onlineIndicatorView)
         
         onlineIndicatorView.topAnchor
-            .constraint(equalTo: topAnchor, constant: 1)
+            .pin(equalTo: topAnchor, constant: 1)
             .isActive = true
         onlineIndicatorView.rightAnchor
-            .constraint(equalTo: rightAnchor, constant: -1)
+            .pin(equalTo: rightAnchor, constant: -1)
             .isActive = true
         onlineIndicatorView.widthAnchor
             .pin(equalTo: widthAnchor, multiplier: 0.2)

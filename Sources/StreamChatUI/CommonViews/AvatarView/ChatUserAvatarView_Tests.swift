@@ -81,15 +81,7 @@ class ChatUserAvatarView_Tests: XCTestCase {
 
             override func setUpLayout() {
                 super.setUpLayout()
-                
-                presenceAvatarView.constraints
-                    .filter { (constraint: NSLayoutConstraint) in
-                        constraint.firstItem as! NSObject == presenceAvatarView.onlineIndicatorView
-                            || constraint.secondItem as! NSObject == presenceAvatarView.onlineIndicatorView
-                    }
-                    .filter { $0.firstAttribute != .width }
-                    .forEach { $0.isActive = false }
-                
+
                 NSLayoutConstraint.activate([
                     presenceAvatarView.onlineIndicatorView.leftAnchor.constraint(equalTo: leftAnchor),
                     presenceAvatarView.onlineIndicatorView.bottomAnchor.constraint(equalTo: bottomAnchor),
