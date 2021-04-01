@@ -15,7 +15,7 @@ final class UserChannelBanEventsMiddleware_Tests: XCTestCase {
         super.setUp()
 
         database = DatabaseContainerMock()
-        middleware = .init(database: database)
+        middleware = .init()
     }
 
     override func tearDown() {
@@ -32,7 +32,7 @@ final class UserChannelBanEventsMiddleware_Tests: XCTestCase {
 
         // Handle non-banned event
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
 
         // Assert event is forwarded as it is
@@ -55,7 +55,7 @@ final class UserChannelBanEventsMiddleware_Tests: XCTestCase {
         // Simulate and handle banned event.
         let event = try UserBannedEvent(from: eventPayload)
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
 
         // Assert `UserBannedEvent` is forwarded even though database error happened.
@@ -76,7 +76,7 @@ final class UserChannelBanEventsMiddleware_Tests: XCTestCase {
         // Simulate and handle banned event.
         let event = try UserUnbannedEvent(from: eventPayload)
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
 
         // Assert `UserUnbannedEvent` is forwarded even though database error happened.
@@ -106,7 +106,7 @@ final class UserChannelBanEventsMiddleware_Tests: XCTestCase {
 
         // Simulate `UserBannedEvent` event.
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
 
         // Assert the member ban information is updated
@@ -148,7 +148,7 @@ final class UserChannelBanEventsMiddleware_Tests: XCTestCase {
 
         // Simulate `UserUnbannedEvent` event.
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
 
         // Assert the member ban information is updated

@@ -26,7 +26,7 @@ class TypingStartCleanupMiddleware<ExtraData: ExtraDataTypes>: EventMiddleware {
         self.excludedUserIds = excludedUserIds
     }
     
-    func handle(event: Event, completion: @escaping (Event?) -> Void) {
+    func handle(event: Event, session: DatabaseSession, completion: @escaping (Event?) -> Void) {
         defer { completion(event) }
         
         // Skip other events and typing events from `excludedUserIds`.

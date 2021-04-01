@@ -10,6 +10,9 @@ class TypingStartCleanupMiddleware_Tests: XCTestCase {
     var currentUser: ChatUser!
     
     var time: VirtualTime!
+    // The database is not really used in the middleware but it's a requirement by the protocol
+    // to provide a database session
+    var database: DatabaseContainer!
     
     override func setUp() {
         super.setUp()
@@ -20,13 +23,20 @@ class TypingStartCleanupMiddleware_Tests: XCTestCase {
         time = VirtualTime()
         VirtualTimeTimer.time = time
         middleware.timer = VirtualTimeTimer.self
+        
+        database = DatabaseContainerMock()
+    }
+    
+    override func tearDown() {
+        AssertAsync.canBeReleased(&database)
+        super.tearDown()
     }
     
     func test_stopTypingEvent_notSentForExcludedUsers() {
         var result: [EquatableEvent?] = []
         let typingStartEvent = TypingEvent(isTyping: true, cid: .unique, userId: currentUser.id)
         // Handle a new TypingStart event for the current user and collect resulting events
-        middleware.handle(event: typingStartEvent) {
+        middleware.handle(event: typingStartEvent, session: database.viewContext) {
             result.append($0.map(EquatableEvent.init))
         }
         
@@ -44,7 +54,7 @@ class TypingStartCleanupMiddleware_Tests: XCTestCase {
         var result: [EquatableEvent?] = []
         let startTyping = TypingEvent(isTyping: true, cid: cid, userId: otherUser.id)
         // Handle a new TypingStart event for the current user and collect resulting events
-        middleware.handle(event: startTyping) {
+        middleware.handle(event: startTyping, session: database.viewContext) {
             result.append($0.map(EquatableEvent.init))
         }
         

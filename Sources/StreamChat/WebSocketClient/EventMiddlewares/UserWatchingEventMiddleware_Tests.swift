@@ -15,7 +15,7 @@ final class UserWatchingEventMiddleware_Tests: XCTestCase {
         super.setUp()
         
         database = DatabaseContainerMock()
-        middleware = .init(database: database)
+        middleware = .init()
     }
     
     override func tearDown() {
@@ -32,7 +32,7 @@ final class UserWatchingEventMiddleware_Tests: XCTestCase {
         
         // Handle non-reaction event
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Assert event is forwarded as it is
@@ -54,7 +54,7 @@ final class UserWatchingEventMiddleware_Tests: XCTestCase {
         // Simulate and handle user watching event.
         let event = try UserWatchingEvent(from: eventPayload)
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Assert `UserWatchingEvent` is forwarded even though database error happened.
@@ -81,7 +81,7 @@ final class UserWatchingEventMiddleware_Tests: XCTestCase {
         
         // Simulate incoming event
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         let loadedChannel = database.viewContext.channel(cid: cid)
@@ -117,7 +117,7 @@ final class UserWatchingEventMiddleware_Tests: XCTestCase {
         
         // Simulate incoming event
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         let loadedChannel = database.viewContext.channel(cid: cid)

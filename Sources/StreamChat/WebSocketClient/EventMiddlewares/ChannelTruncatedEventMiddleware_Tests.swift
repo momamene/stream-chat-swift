@@ -15,7 +15,7 @@ final class ChannelTruncatedEventMiddleware_Tests: XCTestCase {
         super.setUp()
 
         database = DatabaseContainerMock()
-        middleware = .init(database: database)
+        middleware = .init()
     }
 
     override func tearDown() {
@@ -32,7 +32,7 @@ final class ChannelTruncatedEventMiddleware_Tests: XCTestCase {
 
         // Handle non-reaction event
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
 
         // Assert event is forwarded as it is
@@ -53,14 +53,14 @@ final class ChannelTruncatedEventMiddleware_Tests: XCTestCase {
         // Simulate and handle channel truncated event.
         let event = try ChannelTruncatedEvent(from: eventPayload)
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
 
         // Assert `ChannelTruncatedEvent` is forwarded even though database error happened.
         XCTAssertTrue(forwardedEvent is ChannelTruncatedEvent)
     }
 
-    func tests_middleware_handlesCuannelTruncatedEventCorrectly() throws {
+    func tests_middleware_handlesChannelTruncatedEventCorrectly() throws {
         let cid: ChannelId = .unique
         // Create channel truncate event
         let eventPayload: EventPayload<NoExtraData> = .init(
@@ -78,7 +78,7 @@ final class ChannelTruncatedEventMiddleware_Tests: XCTestCase {
 
         // Simulate incoming event
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
 
         // Assert the `truncatedAt` value is updated

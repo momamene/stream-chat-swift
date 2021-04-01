@@ -670,7 +670,7 @@ private class TestEnvironment<ExtraData: ExtraDataTypes> {
                 return self.eventDecoder!
             },
             notificationCenterBuilder: {
-                self.notificationCenter = EventNotificationCenterMock(middlewares: $0)
+                self.notificationCenter = EventNotificationCenterMock(middlewares: $0, database: $1)
                 return self.notificationCenter!
             },
             clientUpdaterBuilder: {

@@ -28,14 +28,18 @@ class EventMiddleware_Tests: XCTestCase {
         let chain: [EventMiddleware] = [
             // Adds `1` to the event synchronously
             ClosureBasedMiddleware { event, session, completion in
+                // Assert the correct session is used
                 XCTAssertEqual(session as! NSManagedObjectContext, usedSession)
+                
                 let event = event as! IntBasedEvent
                 completion(IntBasedEvent(value: event.value + 1))
             },
             
             // Adds `1` to the event synchronously and resets it to `0` asynchronously
             ClosureBasedMiddleware { event, session, completion in
+                // Assert the correct session is used
                 XCTAssertEqual(session as! NSManagedObjectContext, usedSession)
+                
                 let event = event as! IntBasedEvent
                 DispatchQueue.main.async {
                     completion(IntBasedEvent(value: 0))

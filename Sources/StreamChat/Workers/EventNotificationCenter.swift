@@ -8,7 +8,10 @@ import Foundation
 class EventNotificationCenter: NotificationCenter {
     private(set) var middlewares: [EventMiddleware] = []
     
-    init(middlewares: [EventMiddleware] = []) {
+    let database: DatabaseContainer
+    
+    init(middlewares: [EventMiddleware] = [], database: DatabaseContainer) {
+        self.database = database
         super.init()
         middlewares.forEach(add)
     }
@@ -18,9 +21,11 @@ class EventNotificationCenter: NotificationCenter {
     }
     
     func process(_ event: Event) {
-        middlewares.process(event: event) { [weak self] in
-            guard let self = self, let eventToPublish = $0 else { return }
-            self.post(Notification(newEventReceived: eventToPublish, sender: self))
+        database.write { session in
+            self.middlewares.process(event: event, session: session) { [weak self] in
+                guard let self = self, let eventToPublish = $0 else { return }
+                self.post(Notification(newEventReceived: eventToPublish, sender: self))
+            }
         }
     }
 }

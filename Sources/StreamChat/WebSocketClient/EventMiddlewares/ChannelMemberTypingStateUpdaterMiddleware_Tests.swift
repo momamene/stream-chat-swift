@@ -15,7 +15,7 @@ final class ChannelMemberTypingStateUpdaterMiddleware_Tests: XCTestCase {
         super.setUp()
         
         database = DatabaseContainerMock()
-        middleware = ChannelMemberTypingStateUpdaterMiddleware(database: database)
+        middleware = ChannelMemberTypingStateUpdaterMiddleware()
     }
     
     override func tearDown() {
@@ -32,7 +32,7 @@ final class ChannelMemberTypingStateUpdaterMiddleware_Tests: XCTestCase {
         
         // Handle non-typing event
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Assert event is forwarded as it is
@@ -56,7 +56,7 @@ final class ChannelMemberTypingStateUpdaterMiddleware_Tests: XCTestCase {
         // Simulate typing event
         let event = TypingEvent(isTyping: true, cid: cid, userId: memberId)
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Assert `TypingEvent` is forwarded even though database error happened
@@ -84,7 +84,7 @@ final class ChannelMemberTypingStateUpdaterMiddleware_Tests: XCTestCase {
         // Simulate start typing event
         let event = TypingEvent(isTyping: true, cid: cid, userId: memberId)
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Assert `TypingEvent` is forwarded as it is
@@ -117,7 +117,7 @@ final class ChannelMemberTypingStateUpdaterMiddleware_Tests: XCTestCase {
         // Simulate stop typing events
         let event = TypingEvent(isTyping: false, cid: cid, userId: memberId)
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Assert `TypingEvent` is forwarded as it is

@@ -6,15 +6,13 @@ import Foundation
 
 /// The middleware listens for `UserWatchingEvent`s and updates `ChannelDTO`s accordingly.
 struct UserWatchingEventMiddleware<ExtraData: ExtraDataTypes>: EventMiddleware {
-    let database: DatabaseContainer
-    
-    func handle(event: Event, completion: @escaping (Event?) -> Void) {
+    func handle(event: Event, session: DatabaseSession, completion: @escaping (Event?) -> Void) {
         guard let userWatchingEvent = event as? UserWatchingEvent else {
             completion(event)
             return
         }
         
-        database.write { session in
+        do {
             guard let channelDTO = session.channel(cid: userWatchingEvent.cid) else {
                 let currentUserId = session.currentUser()?.user.id
                 if userWatchingEvent.userId == currentUserId {
@@ -42,11 +40,10 @@ struct UserWatchingEventMiddleware<ExtraData: ExtraDataTypes>: EventMiddleware {
             } else {
                 channelDTO.watchers.remove(userDTO)
             }
-        } completion: { error in
-            if let error = error {
-                log.error("Failed to update channel watchers in the database, error: \(error)")
-            }
-            completion(event)
+        } catch {
+            log.error("Failed to update channel watchers in the database, error: \(error)")
         }
+        
+        completion(event)
     }
 }

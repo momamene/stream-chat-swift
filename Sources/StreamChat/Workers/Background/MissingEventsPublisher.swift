@@ -21,7 +21,9 @@ class MissingEventsPublisher<ExtraData: ExtraDataTypes>: EventWorker {
     // MARK: - Properties
     
     private var connectionObserver: EventObserver?
-    @Atomic private var lastSyncedAt: Date?
+    @Atomic private var lastSyncedAt: Date? { didSet {
+        print("LAST SYNCED AT: \(lastSyncedAt)")
+    }}
     
     // MARK: - Init
 
@@ -83,7 +85,9 @@ class MissingEventsPublisher<ExtraData: ExtraDataTypes>: EventWorker {
             self?.apiClient.request(endpoint: endpoint) {
                 switch $0 {
                 case let .success(payload):
+                    print("replaying \(payload.eventPayloads.count)")
                     self?.eventNotificationCenter.process(payload.eventPayloads)
+                    
                 case let .failure(error):
                     log.error("Internal error: Failed to fetch and reply missing events: \(error)")
                 }

@@ -9,7 +9,7 @@ import UIKit
 extension UIViewController {
     // TODO: Where to put this???
     func presentChat(userCredentials: UserCredentials) {
-        LogConfig.level = .error
+        LogConfig.level = .debug
 
         // Create a token
         let token = try! Token(rawValue: userCredentials.token)

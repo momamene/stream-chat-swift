@@ -233,6 +233,8 @@ extension _ChatChannelListVC: _ChatChannelListControllerDelegate {
         _ controller: _ChatChannelListController<ExtraData>,
         didChangeChannels changes: [ListChange<_ChatChannel<ExtraData>>]
     ) {
+        print("Channel list updates: \(changes.count)")
+        
         var movedItems: [IndexPath] = []
         collectionView.performBatchUpdates(
             {

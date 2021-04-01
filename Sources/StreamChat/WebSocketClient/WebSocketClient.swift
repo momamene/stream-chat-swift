@@ -385,7 +385,7 @@ extension UIApplication: BackgroundTaskScheduler {}
 struct HealthCheckMiddleware: EventMiddleware {
     private(set) weak var webSocketClient: WebSocketClient?
 
-    func handle(event: Event, completion: @escaping (Event?) -> Void) {
+    func handle(event: Event, session: DatabaseSession, completion: @escaping (Event?) -> Void) {
         guard let healthCheckEvent = event as? HealthCheckEvent else {
             // Do nothing and forward the event
             completion(event)

@@ -15,7 +15,7 @@ final class MemberEventMiddleware_Tests: XCTestCase {
         super.setUp()
         
         database = DatabaseContainerMock()
-        middleware = .init(database: database)
+        middleware = .init()
     }
     
     override func tearDown() {
@@ -32,7 +32,7 @@ final class MemberEventMiddleware_Tests: XCTestCase {
         
         // Handle non-member event
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Assert event is forwarded as it is
@@ -56,7 +56,7 @@ final class MemberEventMiddleware_Tests: XCTestCase {
         // Simulate and handle reaction event.
         let event = try MemberAddedEvent(from: eventPayload)
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Assert `MemberAddedEvent` is forwarded even though database error happened.
@@ -82,7 +82,7 @@ final class MemberEventMiddleware_Tests: XCTestCase {
         
         // Simulate `MemberAddedEvent` event.
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Load the channel.
@@ -113,7 +113,7 @@ final class MemberEventMiddleware_Tests: XCTestCase {
         // Simulate and handle reaction event.
         let event = try MemberRemovedEvent(from: eventPayload)
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Assert `MemberRemovedEvent` is forwarded even though database error happened.
@@ -146,7 +146,7 @@ final class MemberEventMiddleware_Tests: XCTestCase {
         
         // Simulate `MemberRemovedEvent` event.
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Load the channel again
@@ -177,7 +177,7 @@ final class MemberEventMiddleware_Tests: XCTestCase {
         // Simulate and handle reaction event.
         let event = try MemberUpdatedEvent(from: eventPayload)
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Assert `MemberUpdatedEvent` is forwarded even though database error happened.
@@ -211,7 +211,7 @@ final class MemberEventMiddleware_Tests: XCTestCase {
         
         // Simulate `MemberUpdatedEvent` event.
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Load the channel again

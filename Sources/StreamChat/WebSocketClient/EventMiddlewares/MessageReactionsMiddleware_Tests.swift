@@ -15,7 +15,7 @@ final class MessageReactionsMiddleware_Tests: XCTestCase {
         super.setUp()
         
         database = DatabaseContainerMock()
-        middleware = .init(database: database)
+        middleware = .init()
     }
     
     override func tearDown() {
@@ -32,7 +32,7 @@ final class MessageReactionsMiddleware_Tests: XCTestCase {
         
         // Handle non-reaction event
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Assert event is forwarded as it is
@@ -56,7 +56,7 @@ final class MessageReactionsMiddleware_Tests: XCTestCase {
         // Simulate and handle reaction event.
         let event = try ReactionNewEvent(from: eventPayload)
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Assert `ReactionNewEvent` is forwarded even though database error happened.
@@ -85,7 +85,7 @@ final class MessageReactionsMiddleware_Tests: XCTestCase {
 
         // Simulate `ReactionNewEvent` event.
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Load the message.
@@ -130,7 +130,7 @@ final class MessageReactionsMiddleware_Tests: XCTestCase {
 
         // Simulate `ReactionNewEvent` event.
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Load the message.
@@ -178,7 +178,7 @@ final class MessageReactionsMiddleware_Tests: XCTestCase {
         // Simulate `ReactionDeletedEvent` event.
         let event = try ReactionDeletedEvent(from: eventPayload)
         let forwardedEvent = try await {
-            self.middleware.handle(event: event, completion: $0)
+            self.middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Load the message.

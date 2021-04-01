@@ -12,7 +12,7 @@ class EventDataProcessorMiddleware_Tests: XCTestCase {
     override func setUp() {
         super.setUp()
         database = DatabaseContainerMock()
-        middleware = EventDataProcessorMiddleware(database: database)
+        middleware = EventDataProcessorMiddleware()
     }
     
     override func tearDown() {
@@ -40,7 +40,7 @@ class EventDataProcessorMiddleware_Tests: XCTestCase {
         let testEvent = TestEvent(payload: eventPayload)
         
         // Let the middleware handle the event
-        let completion = try await { middleware.handle(event: testEvent, completion: $0) }
+        let completion = try await { middleware.handle(event: testEvent, session: database.viewContext, completion: $0) }
         
         // Assert the channel data is saved and the event is forwarded
         var loadedChannel: _ChatChannel<NoExtraData>? {
@@ -65,7 +65,7 @@ class EventDataProcessorMiddleware_Tests: XCTestCase {
         database.write_errorResponse = TestError()
         
         // Let the middleware handle the event
-        let completion = try await { middleware.handle(event: testEvent, completion: $0) }
+        let completion = try await { middleware.handle(event: testEvent, session: database.viewContext, completion: $0) }
         
         // Assert the event is not forwarded
         XCTAssertNil(completion)
@@ -78,7 +78,7 @@ class EventDataProcessorMiddleware_Tests: XCTestCase {
         let testEvent = TestEvent()
         
         // Let the middleware handle the event
-        let completion = try await { middleware.handle(event: testEvent, completion: $0) }
+        let completion = try await { middleware.handle(event: testEvent, session: database.viewContext, completion: $0) }
         
         // Assert the event is forwarded
         XCTAssertEqual(completion?.asEquatable, testEvent.asEquatable)

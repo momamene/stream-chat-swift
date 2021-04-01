@@ -30,6 +30,8 @@ class WebSocketClient_Tests: StressTestCase {
     var eventNotificationCenter: EventNotificationCenter!
     private var eventNotificationCenterMiddleware: EventMiddlewareMock!
     
+    var database: DatabaseContainer!
+    
     override func setUp() {
         super.setUp()
         
@@ -46,7 +48,9 @@ class WebSocketClient_Tests: StressTestCase {
         reconnectionStrategy = MockReconnectionStrategy()
         
         requestEncoder = TestRequestEncoder(baseURL: .unique(), apiKey: .init(.unique))
-        eventNotificationCenter = EventNotificationCenter()
+        
+        database = DatabaseContainerMock()
+        eventNotificationCenter = EventNotificationCenter(database: database)
         eventNotificationCenterMiddleware = EventMiddlewareMock()
         eventNotificationCenter.add(middleware: eventNotificationCenterMiddleware)
         
@@ -76,6 +80,7 @@ class WebSocketClient_Tests: StressTestCase {
         AssertAsync.canBeReleased(&webSocketClient)
         AssertAsync.canBeReleased(&eventNotificationCenter)
         AssertAsync.canBeReleased(&eventNotificationCenterMiddleware)
+        AssertAsync.canBeReleased(&database)
         
         super.tearDown()
     }
@@ -427,7 +432,7 @@ class WebSocketClient_Tests: StressTestCase {
         decoder.decodedEvent = incomingEvent
         
         let processedEvent = TestEvent()
-        eventNotificationCenterMiddleware.closure = { middlewareIncomingEvent, completion in
+        eventNotificationCenterMiddleware.closure = { middlewareIncomingEvent, _, completion in
             XCTAssertEqual(incomingEvent.asEquatable, middlewareIncomingEvent.asEquatable)
             completion(processedEvent)
         }
@@ -458,7 +463,7 @@ class WebSocketClient_Tests: StressTestCase {
         connectionStates.forEach { webSocketClient.simulateConnectionStatus($0) }
         
         let expectedEvents = connectionStates.map { ConnectionStatusUpdated(webSocketConnectionState: $0).asEquatable }
-        XCTAssertEqual(eventLogger.equatableEvents, expectedEvents)
+        AssertAsync.willBeEqual(eventLogger.equatableEvents, expectedEvents)
     }
     
     // MARK: - Background task tests
@@ -617,6 +622,10 @@ final class HealthCheckMiddleware_Tests: XCTestCase {
     var middleware: HealthCheckMiddleware!
     var webSocketClient: WebSocketClientMock!
     
+    // The database is not needed for the middleware but it's a requirement by the protocol that we provide a valid
+    // db session, so we need to have it.
+    var database: DatabaseContainer!
+    
     // MARK: - Setup
     
     override func setUp() {
@@ -624,10 +633,13 @@ final class HealthCheckMiddleware_Tests: XCTestCase {
         
         webSocketClient = WebSocketClientMock()
         middleware = HealthCheckMiddleware(webSocketClient: webSocketClient)
+        
+        database = DatabaseContainerMock()
     }
     
     override func tearDown() {
         AssertAsync.canBeReleased(&webSocketClient)
+        AssertAsync.canBeReleased(&database)
         
         super.tearDown()
     }
@@ -639,7 +651,7 @@ final class HealthCheckMiddleware_Tests: XCTestCase {
         
         // Simulate incoming public event
         let forwardedEvent = try await {
-            middleware.handle(event: event, completion: $0)
+            middleware.handle(event: event, session: database.viewContext, completion: $0)
         }
         
         // Assert event is forwared as it is
@@ -654,7 +666,7 @@ final class HealthCheckMiddleware_Tests: XCTestCase {
         
         // Simulate `HealthCheckEvent`
         var forwardedEvent: Event?
-        middleware.handle(event: event) {
+        middleware.handle(event: event, session: database.viewContext) {
             forwardedEvent = $0
         }
         
@@ -667,7 +679,7 @@ final class HealthCheckMiddleware_Tests: XCTestCase {
         
         // Simulate `HealthCheckEvent`
         var forwardedEvent: Event?
-        middleware.handle(event: event) {
+        middleware.handle(event: event, session: database.viewContext) {
             forwardedEvent = $0
         }
         

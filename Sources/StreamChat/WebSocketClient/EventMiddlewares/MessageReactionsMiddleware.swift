@@ -6,9 +6,7 @@ import Foundation
 
 /// The middleware listens for `EventWithReactionPayload` events and updates `MessageReactionDTO` accordingly.
 struct MessageReactionsMiddleware<ExtraData: ExtraDataTypes>: EventMiddleware {
-    let database: DatabaseContainer
-    
-    func handle(event: Event, completion: @escaping (Event?) -> Void) {
+    func handle(event: Event, session: DatabaseSession, completion: @escaping (Event?) -> Void) {
         guard
             let reactionEvent = event as? EventWithReactionPayload,
             let payload = reactionEvent.payload as? EventPayload<ExtraData>,
@@ -18,7 +16,7 @@ struct MessageReactionsMiddleware<ExtraData: ExtraDataTypes>: EventMiddleware {
             return
         }
         
-        database.write({ session in
+        do {
             if reactionEvent is ReactionNewEvent {
                 try session.saveReaction(payload: reaction)
             } else if reactionEvent is ReactionUpdatedEvent {
@@ -36,11 +34,10 @@ struct MessageReactionsMiddleware<ExtraData: ExtraDataTypes>: EventMiddleware {
             } else {
                 throw ClientError.Unexpected("Middleware has tried to handle unsupported event type.")
             }
-        }, completion: { error in
-            if let error = error {
-                log.error("Failed to update message reaction in the database, error: \(error)")
-            }
-            completion(event)
-        })
+        } catch {
+            log.error("Failed to update message reaction in the database, error: \(error)")
+        }
+        
+        completion(event)
     }
 }
